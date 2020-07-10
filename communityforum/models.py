@@ -1,9 +1,18 @@
 from datetime import datetime
 
-from communityforum import db
+from flask_login import UserMixin
+
+from communityforum import db, login_manager
 
 
-class User(db.Model):
+# takes user id and loads it to session, it manages our session for us
+# we inherit UserMixin with a model that this decorator is expecting
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -34,13 +43,3 @@ class Post(db.Model):
 #   from communityforum import db
 #   from communityforum.models import User, Post
 #   db.create_all()
-# Add Dummy User and Post
-#   from app import User, Post
-#   test_user = User(username='Test User', email='test@user.com', password='123456789')
-#   db.session.add(test_user)
-#   db.session.commit()
-#
-#   user.query.all()
-#   user = User.query.filter_by(username='Test User').first()
-#   user.id
-#   user.posts
