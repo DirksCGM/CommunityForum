@@ -1,5 +1,7 @@
 {% extends 'layout.html' %}
-
+{% block banner %}
+    <img src="../static/images/home_banner.jpg" width="100%" alt="Responsive image">
+{% endblock banner %}
 {% block content %}
     {% for post in posts %}
         <h1>{{ post.title }}</h1>
