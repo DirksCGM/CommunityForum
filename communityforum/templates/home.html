@@ -1,9 +1,23 @@
 {% extends 'layout.html' %}
 {% block content %}
     {% for post in posts %}
-        <h1>{{ post.title }}</h1>
-        <small>By {{ post.author }} on {{ post.date_posted }}.</small>
-        <hr>
-        <p>{{ post.content }}</p>
+        <div class="card mb-2">
+            <div class="card-body">
+                <div class="media">
+                    <img src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}"
+                         class="align-self-start mr-3 rounded-circle" alt="profile" style="width: 3rem">
+                    <div class="media-body">
+                        <p class="text-muted">
+                            <a href="#">{{ post.author.username }}</a>
+                            - <small>{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+                        </p>
+                        <h5 class="mt-0"><a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h5>
+                        <p>{{ post.content }}</p>
+                    </div>
+                </div>
+                <hr>
+                <small>{{ post.author.bio }}</small>
+            </div>
+        </div>
     {% endfor %}
 {% endblock content %}

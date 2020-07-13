@@ -19,7 +19,6 @@ class User(db.Model, UserMixin):
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
     bio = db.Column(db.String(225), nullable=True, default=' ')
-    date_created = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
     admin = db.Column(db.Boolean(), nullable=False, default=False)
 
     # one to may from user to post model

@@ -42,6 +42,10 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="{{ url_for('account') }}">Account</a>
                 </li>
+                <li class="nav-item active"><a class="nav-link">|</a></li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('new_post') }}">New Post</a>
+                </li>
                 {% if current_user.admin %}
                     <li class="nav-item active">
                         <a class="nav-link" href="{{ url_for('admin') }}">Admin</a>
