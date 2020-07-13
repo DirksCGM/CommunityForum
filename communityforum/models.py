@@ -18,7 +18,9 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
-    bio = db.Column(db.String(225), nullable=True)
+    bio = db.Column(db.String(225), nullable=True, default=' ')
+    date_created = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
+    admin = db.Column(db.Boolean(), nullable=False, default=False)
 
     # one to may from user to post model
     posts = db.relationship('Post', backref='author', lazy=True)
@@ -36,6 +38,16 @@ class Post(db.Model):
 
     # add user id for posts to user
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f"Post('{self.title}', '{self.date_posted}')"
+
+
+class Communities(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.DateTime(), nullable=False)
+    date_created = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"

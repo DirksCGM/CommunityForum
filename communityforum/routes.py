@@ -81,9 +81,27 @@ def save_picture(form_picture):
     picture_fn = random_hex + f_ext
     picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
 
+    i = Image.open(form_picture)
+    width, height = i.size
+    # crop image
+    if height < width:
+        # make square by cutting off equal amounts left and right
+        left = (width - height) / 2
+        right = (width + height) / 2
+        top = 0
+        bottom = height
+        i = i.crop((left, top, right, bottom))
+
+    elif width < height:
+        # make square by cutting off bottom
+        left = 0
+        right = width
+        top = 0
+        bottom = width
+        i = i.crop((left, top, right, bottom))
+
     # resize image
     output_size = (125, 125)
-    i = Image.open(form_picture)
     i.thumbnail(output_size)
     i.save(picture_path)
 
@@ -112,3 +130,9 @@ def account():
         form.bio.data = current_user.bio
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+@login_required
+def admin():
+    return render_template('admin.html', title='Admin')
