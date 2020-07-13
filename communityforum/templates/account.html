@@ -5,8 +5,13 @@
             <div class="media">
                 <img src="{{ image_file }}" class="mr-3 rounded-circle" alt="user_profile" style="width: 4rem">
                 <div class="media-body">
-                    <h5 class="mt-0">{{ current_user.username }}</h5>
-                    <p class="text-secondary">{{ current_user.email }}</p>
+                    <h3 class="mt-0">{{ current_user.username }}</h3>
+                    <h5 class="text-secondary">{{ current_user.email }}</h5>
+                    {% if current_user.bio == None %}
+                        <p class="text-muted">Consider adding a bio!</p>
+                    {% else %}
+                        <p class="text-secondary">{{ current_user.bio }}</p>
+                    {% endif %}
                 </div>
             </div>
             <div class="content-section mt-2">
@@ -38,6 +43,19 @@
                                 </div>
                             {% else %}
                                 {{ form.email(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.bio.label(class="form-control-label") }}
+                            {% if form.bio.errors %}
+                                {{ form.bio(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.bio.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.bio(class="form-control form-control-lg") }}
                             {% endif %}
                         </div>
                     </fieldset>

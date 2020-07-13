@@ -78,6 +78,7 @@ def account():
     if form.validate_on_submit():
         current_user.username = form.username.data
         current_user.email = form.email.data
+        current_user.bio = form.bio.data
         db.session.commit()
         flash('Your account has been updated!', 'success')
         return redirect(url_for('account'))
@@ -85,5 +86,6 @@ def account():
         # add current details in form for user
         form.username.data = current_user.username
         form.email.data = current_user.email
+        form.bio.data = current_user.bio
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
