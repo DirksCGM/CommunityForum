@@ -1,5 +1,6 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed  # type of filed and file validator
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 
@@ -52,8 +53,10 @@ class UpdateAccountForm(FlaskForm):
                         validators=[DataRequired(), Email()]
                         )
     bio = TextAreaField('Bio',
-                      validators=[DataRequired(), Length(min=2, max=225)]
-                      )
+                        validators=[DataRequired(), Length(min=2, max=225)]
+                        )
+    picture = FileField('Update Profile Picture',
+                        validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')
 
     # custom validation to check if user already exists

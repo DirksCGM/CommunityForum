@@ -12,10 +12,11 @@
     {% endif %}
 </head>
 <body>
-<img src="../static/banners/{{ range(1, 10) | random }}.jpg" width="100%" alt="Responsive image">
+{% set banner_url = range(1, 10) | random %}
+<img src="../static/banners/{{ banner_url }}.jpg" width="100%" alt="Responsive image">
 {# NAVBAR START #}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <a class="navbar-brand" href="#">
+    <a class="navbar-brand" href="{{ url_for('home') }}">
         <img src="../static/images/logo.jpg" width="30" height="30" class="d-inline-block align-top" alt="logo"
              loading="lazy">
     </a>
@@ -39,8 +40,7 @@
                     <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('account') }}">Account -
-                        <small>{{ current_user.username }}</small></a>
+                    <a class="nav-link" href="{{ url_for('account') }}">Account</a>
                 </li>
             {% else %}
                 <li class="nav-item active">
@@ -67,11 +67,19 @@
 </div>
 {# FLASH WINDOW END #}
 {# FOOTER #}
-<nav class="navbar navbar-dark bg-dark text-light mt-4">
+<nav class="navbar navbar-dark bg-dark text-light mt-4 banner-parralax">
     <div class="text-center">
         <small>CommunityForum | DirksCGM &copy; 2020</small>
     </div>
 </nav>
+<style>
+    .banner-parralax {
+        background-image: url("../static/banners/{{ banner_url }}.jpg");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+    }
+</style>
 {# FOOTER END #}
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
