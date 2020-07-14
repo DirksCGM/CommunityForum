@@ -69,34 +69,36 @@ def logout():
     return redirect(url_for('home'))
 
 
-def save_picture(form_picture):
+def save_picture(form_picture, directory, crop):
     random_hex = secrets.token_hex(8)  # unique name for image
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+    picture_path = os.path.join(app.root_path, f'static/{directory}', picture_fn)
 
     i = Image.open(form_picture)
-    width, height = i.size
-    # crop image
-    if height < width:
-        # make square by cutting off equal amounts left and right
-        left = (width - height) / 2
-        right = (width + height) / 2
-        top = 0
-        bottom = height
-        i = i.crop((left, top, right, bottom))
+    if crop:
+        width, height = i.size
+        # crop image
+        if height < width:
+            # make square by cutting off equal amounts left and right
+            left = (width - height) / 2
+            right = (width + height) / 2
+            top = 0
+            bottom = height
+            i = i.crop((left, top, right, bottom))
 
-    elif width < height:
-        # make square by cutting off bottom
-        left = 0
-        right = width
-        top = 0
-        bottom = width
-        i = i.crop((left, top, right, bottom))
+        elif width < height:
+            # make square by cutting off bottom
+            left = 0
+            right = width
+            top = 0
+            bottom = width
+            i = i.crop((left, top, right, bottom))
 
-    # resize image
-    output_size = (125, 125)
-    i.thumbnail(output_size)
+        # resize image
+        output_size = (125, 125)
+        i.thumbnail(output_size)
+
     i.save(picture_path)
 
     return picture_fn
@@ -109,7 +111,7 @@ def account():
     if form.validate_on_submit():
         # check for picture data
         if form.picture.data:
-            picture_file = save_picture(form.picture.data)
+            picture_file = save_picture(form.picture.data, 'profile_pics', True)
             current_user.image_file = picture_file
         current_user.username = form.username.data
         current_user.email = form.email.data
@@ -132,8 +134,10 @@ def new_community():
     form = CommunityForm()
     if form.validate_on_submit():
         flash('Your community has been created!', 'success')
+        picture_file = save_picture(form.picture.data, 'community_pics', False)
         community = Communities(title=form.title.data, description=form.description.data,
-                                url=re.sub(r'[^a-zA-Z ]+', '', form.title.data.lower().strip().replace(' ', '')))
+                                url=re.sub(r'[^a-zA-Z ]+', '', form.title.data.lower().strip().replace(' ', '')),
+                                image_file=picture_file)
         db.session.add(community)
         db.session.commit()
         return redirect(url_for('home'))
@@ -173,12 +177,14 @@ def update_post(post_id):
     if form.validate_on_submit():
         post.title = form.title.data
         post.content = form.content.data
+        post.community = form.community.data
         db.session.commit()
         flash('Your post has been updated!', 'success')
         return redirect(url_for('post', post_id=post.id))
     elif request.method == 'GET':
         form.title.data = post.title
         form.content.data = post.content
+        form.community.data = post.community
     return render_template('create_post.html', title='Update post', form=form,
                            legend='Update Post')
 

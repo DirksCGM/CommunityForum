@@ -92,4 +92,6 @@ class CommunityForm(FlaskForm):
     description = TextAreaField('Description',
                                 validators=[DataRequired()]
                                 )
+    picture = FileField('Add Community Picture',
+                        validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Create')

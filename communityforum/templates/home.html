@@ -5,18 +5,20 @@
     <div class="row">
         {% for community in communities %}
             <div class="col col-lg-4 col-sm-12">
-                <div class="card mb-2">
-                    <div class="card-body">
-                        <div class="media">
-                            <div class="media-body">
-                                <h5 class="mt-0"><a
-                                        href="{{ url_for('community', community_url=community.url) }}">{{ community.title }}</a>
-                                </h5>
-                                <p>{{ community.description }}</p>
+                <a href="{{ url_for('community', community_url=community.url) }}"
+                   class="text-decoration-none text-light">
+                    <div class="card mb-2"
+                         style="background-image: url({{ url_for('static', filename='community_pics/' + community.image_file) }});background-repeat: no-repeat;background-attachment: inherit; background-size: cover; height: 10rem">
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="media-body">
+                                    <h5 class="mt-0" style="text-shadow: 1px 2px 5px #222;">{{ community.title }}</h5>
+                                    <p style="text-shadow: 1px 2px 5px #222;">{{ community.description }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         {% endfor %}
     </div>

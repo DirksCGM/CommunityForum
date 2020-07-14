@@ -32,7 +32,7 @@ class User(db.Model, UserMixin):
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    date_posted = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     content = db.Column(db.Text, nullable=False)
     community = db.Column(db.String(50), nullable=True)
 
@@ -46,12 +46,16 @@ class Post(db.Model):
 class Communities(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
-    url = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(50), nullable=False)
-    date_created = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
+    url = db.Column(db.String(50), nullable=False)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
 
     def __repr__(self):
-        return f"Post('{self.title}', '{self.date_created}')"
+        return f"Communities('{self.title}', '{self.description}','{self.date_created}')"
+
+
+db.create_all()  # RUN THE SCRIPT TO CREATE THE DATABASE
 
 # Add Models to Database in Project using Terminal
 #   from communityforum import db

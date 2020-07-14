@@ -1,7 +1,13 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <h3>{{ communities.title }}</h3>
-    <small class="text-muted">{{ communities.description }}</small>
+    <div class="container text-light" style="background-image: url({{ url_for('static', filename='community_pics/' + communities.image_file) }});background-repeat: no-repeat;background-attachment: fixed; background-size: cover; padding: 2rem">
+        <h3 style="text-shadow: 1px 2px 5px #222;">{{ communities.title }}</h3>
+        <small class="text-light" style="text-shadow: 1px 2px 5px #222;">{{ communities.description }}</small>
+    </div>
+
+    {#    <img src="{{ url_for('static', filename='community_pics/' + communities.image_file) }}">#}
+
+
     <hr>
     {% for post in posts %}
         <div class="card mb-2">
