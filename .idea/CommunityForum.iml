@@ -14,7 +14,7 @@
     <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />
     <option name="TEMPLATE_FOLDERS">
       <list>
-        <option value="$MODULE_DIR$/../CommunityForum\templates" />
+        <option value="$MODULE_DIR$/communityforum/templates" />
       </list>
     </option>
   </component>

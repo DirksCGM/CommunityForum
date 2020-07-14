@@ -1,10 +1,10 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed  # type of filed and file validator
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 
-from communityforum.models import User
+from communityforum.models import User, Communities
 
 
 class RegistrationForm(FlaskForm):
@@ -80,4 +80,16 @@ class PostForm(FlaskForm):
     content = TextAreaField('Content',
                             validators=[DataRequired()]
                             )
+    community = SelectField('Community',
+                            choices=set(zip([c.url for c in Communities.query.all()], [c.title for c in Communities.query.all()])),
+                            validators=[DataRequired()])
     submit = SubmitField('Post')
+
+
+class CommunityForm(FlaskForm):
+    title = StringField('Title',
+                        validators=[DataRequired()])
+    description = TextAreaField('Description',
+                                validators=[DataRequired()]
+                                )
+    submit = SubmitField('Create')

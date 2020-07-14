@@ -1,4 +1,5 @@
 import os
+import re
 import secrets
 
 from PIL import Image
@@ -6,15 +7,22 @@ from flask import render_template, flash, redirect, url_for, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 
 from communityforum import app, bcrypt, db
-from communityforum.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
-from communityforum.models import User, Post
+from communityforum.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, CommunityForm
+from communityforum.models import User, Post, Communities
 
 
 @app.route('/')
 @app.route('/home')
 def home():
-    posts = Post.query.all()
-    return render_template('home.html', posts=posts)
+    communities = Communities.query.all()
+    return render_template('home.html', communities=communities)
+
+
+@app.route('/community/<community_url>')
+def community(community_url):
+    posts = Post.query.filter_by(community=community_url)
+    communities = Communities.query.filter_by(url=community_url).first()
+    return render_template('community.html', posts=posts, communities=communities)
 
 
 @app.route('/about')
@@ -118,13 +126,28 @@ def account():
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 
 
+@app.route('/community/new', methods=['GET', 'POST'])
+@login_required
+def new_community():
+    form = CommunityForm()
+    if form.validate_on_submit():
+        flash('Your community has been created!', 'success')
+        community = Communities(title=form.title.data, description=form.description.data,
+                                url=re.sub(r'[^a-zA-Z ]+', '', form.title.data.lower().strip().replace(' ', '')))
+        db.session.add(community)
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template('create_community.html', title='Admin', form=form, legend='New Community')
+
+
 @app.route('/post/new', methods=['GET', 'POST'])
 @login_required
 def new_post():
     form = PostForm()
     if form.validate_on_submit():
         flash('Your post has been created!', 'success')
-        post = Post(title=form.title.data, content=form.content.data, author=current_user)
+        post = Post(title=form.title.data, content=form.content.data, author=current_user,
+                    community=form.community.data)
         db.session.add(post)
         db.session.commit()
         return redirect(url_for('home'))
@@ -171,9 +194,3 @@ def delete_post(post_id):
     db.session.commit()
     flash('Your post has been deleted!', 'success')
     return redirect(url_for('home'))
-
-
-@app.route('/admin', methods=['GET', 'POST'])
-@login_required
-def admin():
-    return render_template('admin.html', title='Admin')

@@ -34,6 +34,7 @@ class Post(db.Model):
     title = db.Column(db.String(100), nullable=False)
     date_posted = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
     content = db.Column(db.Text, nullable=False)
+    community = db.Column(db.String(50), nullable=True)
 
     # add user id for posts to user
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -45,13 +46,14 @@ class Post(db.Model):
 class Communities(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.DateTime(), nullable=False)
+    url = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(50), nullable=False)
     date_created = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"Post('{self.title}', '{self.date_posted}')"
+        return f"Post('{self.title}', '{self.date_created}')"
 
 # Add Models to Database in Project using Terminal
 #   from communityforum import db
-#   from communityforum.models import User, Post
+#   from communityforum.models import User, Post, Communities
 #   db.create_all()
