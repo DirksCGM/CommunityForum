@@ -1,6 +1,18 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <h3>Communities</h3>
+    <h3>Recent updates</h3>
+    <hr>
+    <h5>Active communities today!</h5>
+    {% for post in posts %}
+        {% if post.date_posted.strftime('%Y-%m-%d') == datetime().strftime('%Y-%m-%d') %}
+            {% for community in communities %}
+                {% if post.community == community.url %}
+                    <b>{{ community.title }}</b> - <span>{{ community.description }}</span><br>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+    <h3 class="mt-4">Communities</h3>
     <hr>
     <div class="row">
         {% for community in communities %}
@@ -22,6 +34,5 @@
             </div>
         {% endfor %}
     </div>
-    <h3>Recent updates</h3>
-    <hr>
+
 {% endblock content %}

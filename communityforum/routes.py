@@ -1,3 +1,4 @@
+import datetime
 import os
 import re
 import secrets
@@ -11,64 +12,7 @@ from communityforum.forms import RegistrationForm, LoginForm, UpdateAccountForm,
 from communityforum.models import User, Post, Communities
 
 
-@app.route('/')
-@app.route('/home')
-def home():
-    communities = Communities.query.all()
-    return render_template('home.html', communities=communities)
-
-
-@app.route('/community/<community_url>')
-def community(community_url):
-    posts = Post.query.filter_by(community=community_url)
-    communities = Communities.query.filter_by(url=community_url).first()
-    return render_template('community.html', posts=posts, communities=communities)
-
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-
-@app.route('/register', methods=['POST', 'GET'])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        # create new user with hashed password
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
-        db.session.add(user)
-        db.session.commit()
-        flash(f'Your account has been created, you are now able to log in!', 'success')
-        return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
-
-
-@app.route('/login', methods=['POST', 'GET'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        # validate login credentials with db
-        user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user, remember=form.remember.data)
-            next_page = request.args.get('next')  # grabs the page someone tried to go to but requires log in first
-            return redirect(next_page) if next_page else redirect(url_for('home'))
-        else:
-            flash(f'Invalid email or password!', 'danger')
-    return render_template('login.html', title='Login', form=form)
-
-
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('home'))
-
-
+# FUNCTIONS    ---------------------------------------------------------------------------------------------------------
 def save_picture(form_picture, directory, crop):
     random_hex = secrets.token_hex(8)  # unique name for image
     _, f_ext = os.path.splitext(form_picture.filename)
@@ -104,46 +48,22 @@ def save_picture(form_picture, directory, crop):
     return picture_fn
 
 
-@app.route('/account', methods=['GET', 'POST'])
-@login_required
-def account():
-    form = UpdateAccountForm()
-    if form.validate_on_submit():
-        # check for picture data
-        if form.picture.data:
-            picture_file = save_picture(form.picture.data, 'profile_pics', True)
-            current_user.image_file = picture_file
-        current_user.username = form.username.data
-        current_user.email = form.email.data
-        current_user.bio = form.bio.data
-        db.session.commit()
-        flash('Your account has been updated!', 'success')
-        return redirect(url_for('account'))
-    elif request.method == 'GET':
-        # add current details in form for user
-        form.username.data = current_user.username
-        form.email.data = current_user.email
-        form.bio.data = current_user.bio
-    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', title='Account', image_file=image_file, form=form)
+# INFO PAGES    --------------------------------------------------------------------------------------------------------
+@app.route('/')
+@app.route('/home')
+def home():
+    communities = Communities.query.all()
+    posts = Post.query.all()
+    return render_template('home.html', communities=communities, posts=posts,
+                           datetime=datetime.datetime.utcnow)
 
 
-@app.route('/community/new', methods=['GET', 'POST'])
-@login_required
-def new_community():
-    form = CommunityForm()
-    if form.validate_on_submit():
-        flash('Your community has been created!', 'success')
-        picture_file = save_picture(form.picture.data, 'community_pics', False)
-        community = Communities(title=form.title.data, description=form.description.data,
-                                url=re.sub(r'[^a-zA-Z ]+', '', form.title.data.lower().strip().replace(' ', '')),
-                                image_file=picture_file)
-        db.session.add(community)
-        db.session.commit()
-        return redirect(url_for('home'))
-    return render_template('create_community.html', title='Admin', form=form, legend='New Community')
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 
+# POST PAGES    --------------------------------------------------------------------------------------------------------
 @app.route('/post/new', methods=['GET', 'POST'])
 @login_required
 def new_post():
@@ -200,3 +120,93 @@ def delete_post(post_id):
     db.session.commit()
     flash('Your post has been deleted!', 'success')
     return redirect(url_for('home'))
+
+
+# COMMUNITY PAGES ------------------------------------------------------------------------------------------------------
+@app.route('/community/<community_url>')
+@login_required
+def community(community_url):
+    posts = Post.query.filter_by(community=community_url)
+    communities = Communities.query.filter_by(url=community_url).first()
+    return render_template('community.html', posts=posts, communities=communities)
+
+
+@app.route('/community/new', methods=['GET', 'POST'])
+@login_required
+def new_community():
+    form = CommunityForm()
+    if form.validate_on_submit():
+        flash('Your community has been created!', 'success')
+        picture_file = save_picture(form.picture.data, 'community_pics', False)
+        community = Communities(title=form.title.data, description=form.description.data,
+                                url=re.sub(r'[^a-zA-Z ]+', '', form.title.data.lower().strip().replace(' ', '')),
+                                image_file=picture_file)
+        db.session.add(community)
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template('create_community.html', title='Admin', form=form, legend='New Community')
+
+
+# ACCOUNT PAGES --------------------------------------------------------------------------------------------------------
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        # create new user with hashed password
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+        flash(f'Your account has been created, you are now able to log in!', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
+
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        # validate login credentials with db
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
+            next_page = request.args.get('next')  # grabs the page someone tried to go to but requires log in first
+            return redirect(next_page) if next_page else redirect(url_for('home'))
+        else:
+            flash(f'Invalid email or password!', 'danger')
+    return render_template('login.html', title='Login', form=form)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+
+@app.route('/account', methods=['GET', 'POST'])
+@login_required
+def account():
+    form = UpdateAccountForm()
+    if form.validate_on_submit():
+        # check for picture data
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data, 'profile_pics', True)
+            current_user.image_file = picture_file
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        current_user.bio = form.bio.data
+        db.session.commit()
+        flash('Your account has been updated!', 'success')
+        return redirect(url_for('account'))
+    elif request.method == 'GET':
+        # add current details in form for user
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+        form.bio.data = current_user.bio
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    return render_template('account.html', title='Account', image_file=image_file, form=form)
