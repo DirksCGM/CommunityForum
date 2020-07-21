@@ -54,7 +54,15 @@ def save_picture(form_picture, directory, crop):
 def home():
     communities = Communities.query.all()
     posts = Post.query.all()
-    return render_template('home.html', communities=communities, posts=posts,
+    new_community = db.engine.execute("""
+        select distinct c.title, c.description, count(post.title) as count, c.url
+        from post
+                 join communities c on post.community = c.url
+        where substr(post.date_posted, 0, 11) = substr(datetime('now', 'localtime'), 0, 11)
+        group by 1;
+    """).fetchall()
+
+    return render_template('home.html', communities=communities, posts=posts, new_community=new_community,
                            datetime=datetime.datetime.utcnow)
 
 

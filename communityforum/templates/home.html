@@ -3,20 +3,21 @@
     <h3>Recent updates</h3>
     <hr>
     <h5>Active communities today!</h5>
-    {% for post in posts %}
-        {% if post.date_posted.strftime('%Y-%m-%d') == datetime().strftime('%Y-%m-%d') %}
-            {% for community in communities %}
-                {% if post.community == community.url %}
-                    <b>{{ community.title }}</b> - <span>{{ community.description }}</span><br>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
+    <div class="row">
+        {% for c in new_community %}
+            <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 mb-2">
+                <span class="badge badge-pill badge-danger">{{ c[2] }}</span>
+                <a class="text-dark"
+                   href="{{ url_for('community', community_url=c[3]) }}">{{ c[0] }}</a><br><small>{{ c[1] }}</small>
+            </div>
+        {% endfor %}
+    </div>
+
     <h3 class="mt-4">Communities</h3>
     <hr>
     <div class="row">
         {% for community in communities %}
-            <div class="col col-lg-4 col-sm-12">
+            <div class="col-lg-4 col-sm-12">
                 <a href="{{ url_for('community', community_url=community.url) }}"
                    class="text-decoration-none text-light">
                     <div class="card mb-2"
