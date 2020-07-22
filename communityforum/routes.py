@@ -144,12 +144,15 @@ def community(community_url):
 def new_community():
     form = CommunityForm()
     if form.validate_on_submit():
-        flash('Your community has been created!', 'success')
-        picture_file = save_picture(form.picture.data, 'community_pics', False)
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data, 'community_pics', False)
+        else:
+            picture_file = 'default.jpg'
         community = Communities(title=form.title.data, description=form.description.data,
                                 url=re.sub(r'[^a-zA-Z ]+', '', form.title.data.lower().strip().replace(' ', '')),
                                 image_file=picture_file)
         db.session.add(community)
+        flash('Your community has been created!', 'success')
         db.session.commit()
         return redirect(url_for('home'))
     return render_template('create_community.html', title='Admin', form=form, legend='New Community')
